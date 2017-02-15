@@ -3,11 +3,16 @@ define([
 ], function () {
 
     var OVERLAY_TEMPLATE = '' +
-'<div class="abs overlay">' +
+'<div class="abs overlay l-large-view">' +
 '    <div class="abs blocker"></div>' +
-'    <div class="abs holder">' +
-'        <a class="close icon-x"></a>' +
-'        <div class="abs contents"></div>' +
+'    <div class="abs outer-holder">' +
+'       <a class="close icon-x-in-circle"></a>' +
+'       <div class="abs inner-holder l-flex-col">' +
+'           <div class="t-contents flex-elem holder grows"></div>' +
+'           <div class="bottom-bar flex-elem holder">' +
+'               <a class="t-done s-button major">Done</a>' +
+'           </div>' +
+'       </div>' +
 '    </div>' +
 '</div>';
 
@@ -41,31 +46,42 @@ define([
             frame = frame[0];
             var layoutContainer = frame.parentElement,
                 isOpen = false,
-                span,
+                overlay,
                 closeButton,
+                doneButton,
+                blocker,
                 overlayContainer;
 
             function openOverlay() {
-                span = document.createElement('span');
-                span.innerHTML = OVERLAY_TEMPLATE;
-                overlayContainer = span.querySelector('.abs.contents');
-                closeButton = span.querySelector('a.close');
+                // Remove frame classes from being applied in a non-frame context
+                $(frame).removeClass('frame frame-template');
+                overlay = document.createElement('span');
+                overlay.innerHTML = OVERLAY_TEMPLATE;
+                overlayContainer = overlay.querySelector('.t-contents');
+                closeButton = overlay.querySelector('a.close');
                 closeButton.addEventListener('click', toggleOverlay);
-                document.body.appendChild(span);
+                doneButton = overlay.querySelector('a.t-done');
+                doneButton.addEventListener('click', toggleOverlay);
+                blocker = overlay.querySelector('.abs.blocker');
+                blocker.addEventListener('click', toggleOverlay);
+                document.body.appendChild(overlay);
                 layoutContainer.removeChild(frame);
-                overlayContainer.appendChild(frame)
-                $element.text('Return to Layout');
+                overlayContainer.appendChild(frame);
             }
 
             function closeOverlay() {
+                $(frame).addClass('frame frame-template');
                 overlayContainer.removeChild(frame);
                 layoutContainer.appendChild(frame);
-                $element.text('View Large');
-                document.body.removeChild(span);
+                document.body.removeChild(overlay);
                 closeButton.removeEventListener('click', toggleOverlay);
                 closeButton = undefined;
+                doneButton.removeEventListener('click', toggleOverlay);
+                doneButton = undefined;
+                blocker.removeEventListener('click', toggleOverlay);
+                blocker = undefined;
                 overlayContainer = undefined;
-                span = undefined;
+                overlay = undefined;
             }
 
             function toggleOverlay() {
